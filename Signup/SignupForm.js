@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Image, ImageBackground, Button } from 'react-native';
 import Images from '../assets/index';
 import database from '@react-native-firebase/database';
+import { TouchableHighlight, TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function SignupForm({ navigation }) {
 
@@ -82,9 +83,6 @@ export default function SignupForm({ navigation }) {
         else if (isPasswordValid() == "") {
             setResult("Password must be of 6-12 digit");
         }
-        else if (isPhoneNumberValid() == "") {
-            setResult("PhoneNumber must be of 10 digit");
-        }
         else if (isPincodeValid() == "") {
             setResult("Pincode must be of of 6 digit");
         }
@@ -115,6 +113,8 @@ export default function SignupForm({ navigation }) {
                     .then(() => navigation.navigate('Login'));
             }
         }
+        console.log(num)
+
     }
     return (
         <View style={styles.container}>
@@ -228,7 +228,10 @@ export default function SignupForm({ navigation }) {
                     </View>
                 </View>
                 <View style={styles.buttonContainer}>
-                    <Button onPress={handleSubmit} title="Create Account" />
+                    <TouchableOpacity onPress={handleSubmit} style={styles.ButtonStyle}>
+                        <Text>Create Account </Text>
+                        <Image style={styles.image} source={Images.forward} />
+                    </TouchableOpacity>
                 </View>
             </ImageBackground>
         </View>
@@ -293,5 +296,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 10,
         top: 10
+    },
+    ButtonStyle: {
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
+        borderColor: 'gray',
+        borderWidth: 2,
+        padding: 10,
+        flexDirection: 'row'
     }
 });

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Image, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Image, Modal, ImageBackground, TouchableHighlight, TouchableOpacity } from 'react-native';
 import Images from '../assets/index';
 import database from '@react-native-firebase/database';
 export default function LoginForm({ navigation }) {
+
     const [Email, setEmail] = useState();
     const [Password, setPassword] = useState();
     const [result, setResult] = useState()
     const [visible, setVisible] = useState(true)
+    const [modalVisible, setModalVisible] = useState(false);
+
     const handleVisibility = e => {
         setVisible(!visible)
     }
@@ -14,7 +17,7 @@ export default function LoginForm({ navigation }) {
         navigation.navigate("Signup");
     }
     const handleForgot = e => {
-        console.log("handleForgot called")
+        setModalVisible(true);
     }
     const handleSubmit = e => {
         e.preventDefault();
@@ -47,9 +50,86 @@ export default function LoginForm({ navigation }) {
         }
     }
 
+    const handlePasswordChange = () => {
+        const user = {
+            Email: Email,
+            Password: Password
+        };
+        if (
+            Email == "" ||
+            Password == ""
+        ) {
+            setResult("Required!");
+        }
+        else {
+            database()
+                .ref('/users')
+                .once('value')
+                .then(snapshot => {
+
+                    snapshot.val().map(value => {
+
+                        if (value != null) {
+                            if (value.Email === user.Email) {
+                            }
+                            else {
+                                setResult('User do not exist')
+                            }
+                        }
+                    })
+                });
+            setModalVisible(!modalVisible);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <ImageBackground source={Images.background} style={styles.containerBackground}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalText}>Enter your Email and new Password</Text>
+                            <Text style={{ paddingHorizontal: 15, color: 'red', textAlign: 'right' }}></Text>
+                            <View style={styles.Inputtext}>
+                                <Image style={styles.image} source={Images.person} />
+                                <TextInput
+                                    placeholder="Email"
+                                    name="Email"
+                                    style={{ paddingBottom: 0 }}
+                                    onChangeText={text => {
+                                        setEmail(text);
+                                    }}
+                                />
+                            </View>
+                            <View style={styles.Inputtext}>
+                                <Image style={styles.image} source={Images.lock} />
+
+                                <TextInput
+                                    style={{ paddingBottom: 0 }}
+                                    placeholder="Password"
+                                    name="Password"
+                                    secureTextEntry={visible}
+                                    onChangeText={text => {
+                                        setPassword(text);
+                                    }}
+                                />
+                                <Text style={styles.icon} onPress={handleVisibility}>
+                                    <Image style={styles.image} source={visible ? Images.invisible : Images.visible} />
+                                </Text>
+                            </View>
+                            <TouchableHighlight
+                                style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
+                                onPress={handlePasswordChange}
+                            >
+                                <Text style={styles.textStyle}>Submit</Text>
+                            </TouchableHighlight>
+                        </View>
+                    </View>
+                </Modal>
                 <View style={styles.textContainer}>
                     <Image style={styles.image} source={Images.person} />
                     <Text onPress={handleNavigate} style={styles.text}>Create Account!</Text>
@@ -84,7 +164,9 @@ export default function LoginForm({ navigation }) {
                             <Image style={styles.image} source={visible ? Images.invisible : Images.visible} />
                         </Text>
                     </View>
-                    <Button onPress={handleSubmit} style={styles.button}>Get Started</Button>
+                    <TouchableOpacity onPress={handleSubmit} style={styles.button}>
+                        <Text style={{ textAlign: 'center' }}>Get Started</Text>
+                    </TouchableOpacity>
 
                 </View>
                 <View style={styles.buttonContainer}>
@@ -134,6 +216,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         paddingHorizontal: 40,
         paddingBottom: 5,
+        marginBottom: 5
     },
     image: {
         height: 20,
@@ -155,10 +238,43 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         borderWidth: 2,
         borderRadius: 19,
+        padding: 7,
+
     },
     forgot: {
         paddingHorizontal: 20,
         fontFamily: 'sans-serif-medium',
         fontSize: 15,
+    },
+    modalView: {
+        margin: 20,
+        marginTop: 170,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    openButton: {
+        backgroundColor: "#F194FF",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        fontSize: 15,
+        marginBottom: 10,
+        textAlign: 'center'
     }
 });
